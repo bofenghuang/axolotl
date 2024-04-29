@@ -5,6 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Debug Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
             "name": "Debug axolotl prompt - sharegpt",
             "type": "python",
             "module": "accelerate.commands.launch",
@@ -26,8 +34,58 @@
             "console": "integratedTerminal",      // show output in the integrated terminal
             "cwd": "${workspaceFolder}/devtools", // set working directory to devtools from the root of the project
             "justMyCode": true,                   // step through only axolotl code
-            "env": {"CUDA_VISIBLE_DEVICES": "0",  // Since we aren't doing distributed training, we need to limit to one GPU
-                    "HF_HOME": "${workspaceFolder}/devtools/temp_debug/.hf-cache"}, // send HF cache to a temp folder
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "0",  // Since we aren't doing distributed training, we need to limit to one GPU
+                "HF_HOME": "${workspaceFolder}/devtools/temp_debug/.hf-cache"}, // send HF cache to a temp folder
+            "preLaunchTask": "cleanup-for-dataprep", // delete temp folders (see below)
+        },
+        {
+            "name": "Debug Axolotl - SFT",
+            "type": "python",
+            "module": "accelerate.commands.launch",
+            "request": "launch",
+            "args": [
+                "--main_process_port", "29002",
+                "-m", "axolotl.cli.train", "dev_sft.yml",
+                // "-m", "axolotl.cli.train", "/home/bhuang/nlp/axolotl/examples/llama-3/b_sft_qlora.yml",
+                // The flags below simplify debugging by overriding the axolotl config
+                // with the debugging tips above.  Modify as needed.
+                // "--dataset_processes=1",      // limits data preprocessing to one process
+                // "--max_steps=1",              // limits training to just one step
+                // "--batch_size=1",             // minimizes batch size
+                // "--micro_batch_size=1",       // minimizes batch size
+                // "--val_set_size=0",           // disables validation
+                // "--sample_packing=False",     // disables sample packing which is necessary for small datasets
+                // "--eval_sample_packing=False",// disables sample packing on eval set
+                "--dataset_prepared_path=temp_debug/axolotl_outputs/data", // send data outputs to a temp folder
+                "--output_dir=temp_debug/axolotl_outputs/model" // send model outputs to a temp folder
+                ],
+            "console": "integratedTerminal",      // show output in the integrated terminal
+            "cwd": "${workspaceFolder}/devtools", // set working directory to devtools from the root of the project
+            "justMyCode": false,                   // step through only axolotl code
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "4",  // Since we aren't doing distributed training, we need to limit to one GPU
+                "HF_HOME": "/projects/bhuang/.cache/huggingface", // send HF cache to a temp folder
+            },
+            "preLaunchTask": "cleanup-for-dataprep", // delete temp folders (see below)
+        },
+        {
+            "name": "Run Axolotl",
+            "type": "python",
+            "module": "accelerate.commands.launch",
+            "request": "launch",
+            "args": [
+                "-m", "axolotl.cli.train", "../examples/dpo.yml",
+                "--dataset_prepared_path=temp_debug/axolotl_outputs/data", // send data outputs to a temp folder
+                "--output_dir=temp_debug/axolotl_outputs/model" // send model outputs to a temp folder
+                ],
+            "console": "integratedTerminal",      // show output in the integrated terminal
+            "cwd": "${workspaceFolder}/devtools", // set working directory to devtools from the root of the project
+            "justMyCode": false,                   // step through only axolotl code
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "5",  // Since we aren't doing distributed training, we need to limit to one GPU
+                "HF_HOME": "/projects/bhuang/.cache/huggingface", // send HF cache to a temp folder
+            },
             "preLaunchTask": "cleanup-for-dataprep", // delete temp folders (see below)
         }
     ]
