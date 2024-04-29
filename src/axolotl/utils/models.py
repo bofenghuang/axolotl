@@ -282,6 +282,7 @@ def load_tokenizer(cfg):
         LOG.debug(f"PAD: {tokenizer.pad_token_id} / {tokenizer.pad_token}")
         LOG.debug(f"UNK: {tokenizer.unk_token_id} / {tokenizer.unk_token}")
 
+    # bh: save chat template into tokenizer
     if cfg.chat_template:
         chat_template_string = chat_templates(cfg.chat_template)
         if cfg.default_system_message and cfg.chat_template == "chatml":
@@ -415,6 +416,8 @@ def load_model(
             )
 
             LOG.info("patching llama _prepare_4d_causal_attention_mask*")
+            # bh:
+            # todo:
             hijack_llama_prepare_4d_mask()
         elif cfg.s2_attention:
             raise NotImplementedError(
@@ -448,6 +451,8 @@ def load_model(
         from axolotl.monkeypatch.llama_expand_mask import hijack_expand_mask
 
         LOG.info("patching _expand_mask")
+        # bh:
+        # todo:
         hijack_expand_mask()
 
     model_kwargs: Dict[str, Any] = {}
@@ -529,7 +534,9 @@ def load_model(
             "bnb_4bit_compute_dtype": cfg.torch_dtype,
             "bnb_4bit_use_double_quant": True,
             "bnb_4bit_quant_type": "nf4",
-            "bnb_4bit_quant_storage": torch.bfloat16,
+            # bh:
+            # todo: why bf16/fp16 instead of default uint8
+            # "bnb_4bit_quant_storage": torch.bfloat16,
         }
         if cfg.model_config_type in ["jamba", "qwen2_moe"] and not cfg.deepspeed:
             # for some reason, this causes the loss to be off by an order of magnitude
@@ -635,6 +642,7 @@ def load_model(
                 if "device_map" in model_kwargs:
                     del model_kwargs["device_map"]
 
+            # bh: load llama
             model = AutoModelForCausalLM.from_pretrained(
                 base_model,
                 config=model_config,
@@ -742,6 +750,8 @@ def load_model(
     ):
         model.resize_token_embeddings(embeddings_len)
     else:
+        # bh:
+        # todo: is this a must when not resizing embedding?
         model.tie_weights()
 
     if (
@@ -774,6 +784,7 @@ def load_model(
     if hasattr(model, "device") and model.device.type in ("cuda", "mps"):
         log_gpu_memory_usage(LOG, "after model load", model.device)
 
+    # bh: upcast layernorm, gate, token layers (embed_tokens, lm_head) to fp32
     # make sure these are fp32 per Ramesh et al. (2021)
     embedding_modules = get_linear_embedding_layers(cfg.model_config_type)
     if not cfg.fsdp:
@@ -815,8 +826,10 @@ def load_model(
         # make sure everything is in the same dtype
         skip_prepare_model_for_kbit_training = True
 
+    # todo: gradient_checkpointing handle for lora
     if cfg.adapter in ["lora", "qlora"]:
         if cfg.gradient_checkpointing:
+            # bh: activate gradient checkpoiting
             model.gradient_checkpointing_enable(
                 gradient_checkpointing_kwargs=cfg.gradient_checkpointing_kwargs
             )
@@ -824,11 +837,14 @@ def load_model(
             cfg.load_in_8bit or cfg.load_in_4bit
         ) and not skip_prepare_model_for_kbit_training:
             LOG.info("converting PEFT model w/ prepare_model_for_kbit_training")
+            # bh: cast all non int4/8 parameters (layernorm, embed_tokens, lm_head, etc) to fp32
+            # bh: make output embedding layer require grads?
             model = prepare_model_for_kbit_training(
                 model, use_gradient_checkpointing=cfg.gradient_checkpointing
             )
         needs_fa2_dtype = True
 
+    # todo: why convert norm to fp16/bf16 for fa2
     # LlamaRMSNorm layers are in fp32 after kbit_training or full finetune, so we need to
     # convert them back to fp16/bf16 for flash-attn compatibility.
     if (needs_fa2_dtype or cfg.flash_attention) and not qlora_fsdp:
@@ -840,6 +856,7 @@ def load_model(
                 if hasattr(module, "weight"):
                     module.to(cfg.torch_dtype)
 
+    # bh: load lora adapter
     lora_config = None
     if not reference_model or cfg.lora_model_dir:
         # if we're not loading the reference model, then we're loading the model for training
@@ -848,6 +865,19 @@ def load_model(
             _, lora_config = load_lora(model, cfg, inference=False, config_only=True)
         else:
             model, lora_config = load_adapter(model, cfg, cfg.adapter)
+
+    # bh: handle "ValueError: Attempting to unscale FP16 gradients"
+    # bh: occurred when loading model in fp16 and using amp (fp16=True in HF trainer)
+    # bh: when using AMP, trainable weights should never use fp16 (but can be bf16?)
+    # bh: also when training w/ LoRA, frozen base_model can be FP16, but not modules in lora_modules_to_save
+    # https://github.com/huggingface/peft/pull/1336
+    # https://github.com/huggingface/peft/issues/1249
+    # https://github.com/huggingface/peft/issues/341
+    # https://github.com/huggingface/transformers/issues/23165
+    # https://github.com/OpenAccess-AI-Collective/axolotl/issues/1031
+    if cfg.adapter and cfg.torch_dtype == torch.float16 and cfg.lora_modules_to_save:
+        for param in filter(lambda p: p.requires_grad, model.parameters()):
+            param.data = param.data.float()
 
     if (
         cfg.ddp
