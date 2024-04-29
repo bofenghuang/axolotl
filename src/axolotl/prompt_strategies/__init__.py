@@ -9,6 +9,7 @@ from axolotl.prompt_strategies.user_defined import UserDefinedDatasetConfig
 LOG = logging.getLogger("axolotl.prompt_strategies")
 
 
+# bh: load PromptTokenizingStrategy
 def load(strategy, tokenizer, cfg, ds_cfg):
     try:
         load_fn = "load"

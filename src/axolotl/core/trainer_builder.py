@@ -1090,7 +1090,8 @@ class HFCausalTrainerBuilder(TrainerBuilderBase):
     def get_callbacks(self):
         callbacks = super().get_callbacks()
         callbacks.append(GPUStatsCallback(self.cfg))
-        callbacks.append(EvalFirstStepCallback())
+        # bh: optional
+        # callbacks.append(EvalFirstStepCallback())
 
         if self.cfg.relora_steps:
             callbacks.append(ReLoRACallback(self.cfg))
@@ -1270,6 +1271,9 @@ class HFCausalTrainerBuilder(TrainerBuilderBase):
             # we have an eval set, but no steps defined, default to use epoch
             training_arguments_kwargs["evaluation_strategy"] = "epoch"
 
+        if self.cfg.eval_delay is not None:
+            training_arguments_kwargs["eval_delay"] = self.cfg.eval_delay
+
         if self.cfg.save_steps:
             training_arguments_kwargs["save_strategy"] = "steps"
             training_arguments_kwargs["save_steps"] = self.cfg.save_steps
@@ -1323,6 +1327,7 @@ class HFCausalTrainerBuilder(TrainerBuilderBase):
             ] = self.cfg.ddp_broadcast_buffers
 
         # these are all the "standard" kwargs that are def used
+        # bh: total_num_steps is already min(total_num_steps, cfg.max_steps) if cfg.max_steps at this point
         training_arguments_kwargs["max_steps"] = (
             total_num_steps if self.cfg.max_steps else -1
         )
@@ -1520,6 +1525,8 @@ class HFCausalTrainerBuilder(TrainerBuilderBase):
             )
         )
         training_args = self.hook_post_create_training_args(training_args)
+        # bh: debug
+        # LOG.debug(training_args)
 
         data_collator_kwargs = {
             "padding": True,  # True/"longest" is the default

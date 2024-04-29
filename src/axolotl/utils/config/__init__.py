@@ -99,6 +99,7 @@ def normalize_config(cfg):
     if cfg.bf16 or cfg.bfloat16:
         cfg.torch_dtype = torch.bfloat16
     elif cfg.load_in_8bit or cfg.fp16 or cfg.float16:
+        # bh: this is not safe to load in float16 when using AMP (fp16), discussed later
         cfg.torch_dtype = torch.float16
     else:
         cfg.torch_dtype = torch.float32

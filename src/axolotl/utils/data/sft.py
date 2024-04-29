@@ -296,6 +296,7 @@ def load_tokenized_prepared_datasets(
                 elif local_path.is_file():
                     ds_type = get_ds_type(config_dataset)
 
+                    # bh: load dataset
                     ds = load_dataset(
                         ds_type,
                         name=config_dataset.name,
@@ -421,6 +422,7 @@ def load_tokenized_prepared_datasets(
             else:
                 LOG.debug("NOT shuffling merged datasets")
 
+        # bh: drop_long, add_length, add_position_ids
         dataset, _ = process_datasets_for_packing(cfg, dataset, None)
 
         if cfg.local_rank == 0:
@@ -560,8 +562,10 @@ def get_dataset_wrapper(
             dataset,
             **ds_kwargs,
         )
+    # bh: laod PromptTokenizingStrategy and Prompter
     elif ds_strategy := load(config_dataset.type, tokenizer, cfg, config_dataset):
         dataset_prompter = UnsupportedPrompter()
+        # bh: run dataset.map here in __init__
         dataset_wrapper = TokenizedPromptDataset(
             ds_strategy,
             dataset,

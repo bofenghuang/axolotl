@@ -83,6 +83,7 @@ class ChatTemplateStrategy(PromptTokenizingStrategy):
         prompt_ids = self.prompter.build_prompt(turns[:-1], add_generation_prompt=True)
         input_ids = self.prompter.build_prompt(turns)
 
+        # bh: only mask last assistant message in multi-turn
         if not self.train_on_inputs:
             user_prompt_len = len(prompt_ids)
             labels = [-100] * user_prompt_len + input_ids[user_prompt_len:]

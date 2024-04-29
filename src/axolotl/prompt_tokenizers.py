@@ -58,6 +58,7 @@ class PromptTokenizingStrategy(abc.ABC):
     def supports_batched(self):
         return False
 
+    # bh: in-house tokenize func with bos/eos control
     def _tokenize(
         self, prompt: str, add_eos_token: bool = True, strip_bos_token: bool = False
     ) -> BatchEncoding:
@@ -422,6 +423,7 @@ class ShareGPTPromptTokenizingStrategy(PromptTokenizingStrategy):
                     # this should be the assistant response, should end with an eos token
                     if not content.strip():
                         LOG.warning(f"assistant turn has empty text: {prompt}")
+                    # bh: if use chatml's <im_end> as eos token (<|end_of_text|>)
                     add_eos_token = not (
                         conversation.name == "chatml"
                         and conversation.sep == self.tokenizer.eos_token
@@ -431,6 +433,8 @@ class ShareGPTPromptTokenizingStrategy(PromptTokenizingStrategy):
                         add_eos_token=add_eos_token,
                         strip_bos_token=True,
                     )
+                    # bh: rstrip() is wrong
+                    # bh: for chatml, it strips "<im_start>assistant\n" to "<im_start>assistant"
                     role_res = self._tokenize(
                         role.rstrip(),
                         add_eos_token=False,
@@ -438,6 +442,7 @@ class ShareGPTPromptTokenizingStrategy(PromptTokenizingStrategy):
                     )
                     labels = copy.deepcopy(res["input_ids"])
                     if not self.train_on_inputs:
+                        # bh: mask assistant role prefix
                         # mask out role tokens from the labels
                         len_role = len(role_res["input_ids"])
                         labels[:len_role] = [IGNORE_TOKEN_ID] * min(

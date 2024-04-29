@@ -297,6 +297,7 @@ class ShareGPTPrompter(Prompter):  # pylint: disable=too-few-public-methods
             if isinstance(conversation, Conversation):
                 self._conversation = conversation
             else:
+                # bh: load "conversation" from fastchat
                 self._conversation = get_conv_template(conversation)
         else:
             self._conversation = get_conv_template("vicuna_v1.1")

@@ -96,7 +96,8 @@ def train(
     # we wait unitl the last possible moment to setup Accelerator
     Accelerator()
     model, peft_config = load_model(cfg, tokenizer, inference=cli_args.inference)
-    model.generation_config.do_sample = True
+    # bh: why?
+    # model.generation_config.do_sample = True
 
     model_ref = None
     if cfg.rl and cfg.rl != "orpo":

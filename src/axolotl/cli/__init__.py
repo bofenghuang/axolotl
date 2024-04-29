@@ -55,7 +55,8 @@ os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "1"
 
 def print_axolotl_text_art(suffix=None):
     font = "nancyj"
-    ascii_text = "  axolotl"
+    # ascii_text = "  axolotl"
+    ascii_text = "  marmotte"
     if suffix:
         ascii_text += f"  x  {suffix}"
     ascii_art = text2art(ascii_text, font=font)
