@@ -55,6 +55,34 @@ def register_llama3_template(system_message=None):
     )
 
 
+# bh: register vigogne_chat_v4 template
+def register_vigogne_chat_v4_template():
+    # register_conv_template(
+    #     Conversation(
+    #         name="vigogne_chat_v4",
+    #         system_template="<|system|>\n{system_message}\n",
+    #         roles=("<|user|>\n", "<|assistant|>\n"),
+    #         sep_style=SeparatorStyle.NO_COLON_TWO,
+    #         sep="\n",
+    #         sep2="</s>\n",
+    #         stop_str="</s>",
+    #     )
+    # )
+
+    register_conv_template(
+        Conversation(
+            name="vigogne_chat_v4",
+            system_template="<|system|>{system_message}<|end_of_text|>",
+            roles=("<|user|>", "<|assistant|>"),
+            sep_style=SeparatorStyle.NO_COLON_SINGLE,
+            sep="<|end_of_text|>",
+            stop_str="<|end_of_text|>",
+        )
+    )
+
+
+# bh: PromptTokenizingStrategy.tokenize_prompt()
+# bh: Prompter.build_prompt()
 def build_loader(
     tokenization_strategy_cls: Type["ShareGPTPromptTokenizingStrategy"],
     prompter_cls: Type["ShareGPTPrompterV2"],
@@ -93,6 +121,7 @@ def build_loader(
     return _load
 
 
+# bh: convert custmized "conversations" format to sharegpt
 class SimpleShareGPTPromptTokenizingStrategy(ShareGPTPromptTokenizingStrategy):
     """
     basic sharegpt strategy to grab conversations from the sample row
@@ -188,7 +217,8 @@ class UltrachatShareGPTPromptTokenizingStrategy(SimpleShareGPTPromptTokenizingSt
 
     def get_conversation_thread(self, prompt):
         conversations = prompt["messages"]
-        role_map = {"user": "human", "assistant": "gpt"}
+        # role_map = {"user": "human", "assistant": "gpt"}
+        role_map = {"user": "human", "assistant": "gpt", "system": "system"}
         turns = [
             {"from": role_map[t["role"]], "value": t["content"]} for t in conversations
         ]

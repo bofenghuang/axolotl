@@ -65,7 +65,9 @@ def get_turns(  # pylint: disable=too-many-return-statements
         return
     if self.sep_style == SeparatorStyle.NO_COLON_TWO:
         seps = [self.sep, self.sep2]
-        yield "", system_prompt
+        # bh: adapt to support vigogne_chat_v4
+        # yield "", system_prompt
+        yield "", system_prompt if self.system_message else ""
         for i, (role, message) in enumerate(self.messages):
             if message:
                 yield role, message + seps[i % 2]

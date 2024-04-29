@@ -184,6 +184,8 @@ class ChatTemplate(str, Enum):
     cohere = "cohere"  # pylint: disable=invalid-name
     llama3 = "llama3"  # pylint: disable=invalid-name
     phi_3 = "phi_3"  # pylint: disable=invalid-name
+    # bh: patch for vigogne_chat_v4
+    vigogne_chat_v4 = "vigogne_chat_v4"  # pylint: disable=invalid-name
 
 
 class LoftQConfig(BaseModel):
@@ -630,6 +632,7 @@ class AxolotlInputConfig(
     eval_steps: Optional[Union[int, float]] = None
     evals_per_epoch: Optional[Union[int]] = None
     evaluation_strategy: Optional[str] = None
+    eval_delay: Optional[int] = None
     save_steps: Optional[Union[int, float]] = None
     saves_per_epoch: Optional[int] = None
     save_strategy: Optional[str] = None

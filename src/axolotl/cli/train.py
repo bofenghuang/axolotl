@@ -23,6 +23,7 @@ from axolotl.common.cli import TrainerCliArgs
 from axolotl.prompt_strategies.sharegpt import (
     register_chatml_template,
     register_llama3_template,
+    register_vigogne_chat_v4_template,
 )
 from axolotl.train import train
 
@@ -48,6 +49,8 @@ def do_train(cfg, cli_args) -> Tuple[PreTrainedModel, PreTrainedTokenizer]:
             f"ChatML set. Adding default system message: {cfg.default_system_message}"
         )
         register_chatml_template(cfg.default_system_message)
+    elif cfg.chat_template == "vigogne_chat_v4":
+        register_vigogne_chat_v4_template()
     else:
         register_chatml_template()
 
