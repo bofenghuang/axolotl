@@ -310,7 +310,7 @@ def calculate_total_num_steps(cfg, train_dataset, update=True):
             .sum()
         )
         LOG.debug(
-            f"`total_supervised_tokens: {total_supervised_tokens:_}`",
+            f"total_supervised_tokens: {total_supervised_tokens:_}",
             main_process_only=True,
         )
         if update:
@@ -387,7 +387,10 @@ def calculate_total_num_steps(cfg, train_dataset, update=True):
         total_num_steps = int(
             math.ceil(len(train_dataset) * cfg.num_epochs / cfg.batch_size)
         )
-    LOG.debug(f"total_num_steps: {total_num_steps}", main_process_only=True)
+    LOG.debug(f"num_examples: {train_dataset.num_rows:_}", main_process_only=True)
+    LOG.debug(f"num_packed_examples: {cfg.batch_size * total_num_steps // cfg.num_epochs:_}", main_process_only=True)
+    LOG.debug(f"effective_batch_size: {cfg.batch_size}", main_process_only=True)
+    LOG.debug(f"total_num_steps: {total_num_steps:_}", main_process_only=True)
     return total_num_steps
 
 
@@ -437,4 +440,5 @@ def setup_trainer(cfg, train_dataset, eval_dataset, model, tokenizer, total_num_
     trainer_builder.train_dataset = train_dataset
     trainer_builder.eval_dataset = eval_dataset
 
+    # bh: build trainer here
     return trainer_builder.build(total_num_steps)
