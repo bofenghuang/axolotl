@@ -1,0 +1,260 @@
+# config
+
+# yaml direct write
+strict: false
+
+# seed
+seed: 10
+
+# base model
+# base_model: meta-llama/Meta-Llama-3-8B
+base_model: /projects/bhuang/models/llm/pretrained/Meta-Llama-3-8B
+model_type: AutoModelForCausalLM
+tokenizer_type: AutoTokenizer
+# tokenizer_use_fast: false
+
+# resize_token_embeddings_to_32x:
+# overrides_of_model_config:
+#   rope_scaling:
+#     type: # linear | dynamic
+#     factor: # float
+
+# low_cpu_mem_usage:
+
+# Resume from a specific checkpoint dir
+resume_from_checkpoint:
+# If resume_from_checkpoint isn't set and you simply want it to start where it left off.
+auto_resume_from_checkpoints: true
+
+# dtype
+bf16: auto
+fp16:  # leave empty to use fp16 when bf16 is 'auto'
+tf32: false
+# No AMP ??
+bfloat16: false
+float16: false
+
+# quantization
+load_in_8bit: false
+load_in_4bit: true
+# bnb_config_kwargs:
+#   llm_int8_has_fp16_weight: false
+#   bnb_4bit_quant_type: nf4
+#   bnb_4bit_use_double_quant: true
+
+# adapter
+adapter: qlora
+# lora_model_dir:
+lora_r: 64
+lora_alpha: 32
+lora_dropout: 0.05
+# lora_target_modules:
+lora_target_linear: true
+lora_modules_to_save:
+ - embed_tokens
+ - lm_head
+lora_fan_in_fan_out:
+
+# data
+datasets:
+  - path: /projects/bhuang/corpus/text/llm/generated/self_instruct/self_instruct_merged_v21_v22_processed_mininstlen8_uncensored_decontaminated09_train.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+  - path: /projects/bhuang/corpus/text/llm/generated/orca/1m_gpt4_augmented_merged_v1_v2_processed_uncensored_decontaminated09_train.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+  - path: /projects/bhuang/corpus/text/llm/generated/math/metaMathQA_merged_v01_v02_processed_uncensored_decontaminated09_train.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+  - path: /projects/bhuang/corpus/text/llm/generated/math/orca_math_word_problems_maxsim08_translated_processed_responded_gpt4turbo0125_processed_uncensored_decontaminated09_train.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+  - path: /projects/bhuang/corpus/text/llm/generated/math/mathinstruct_cot_metamathorcamaxsim09_maxsim08_processed_responded_gpt4turbo0409_processed_chat_merged_processed_uncensored_decontaminated09_train.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+  - path: /projects/bhuang/corpus/text/llm/generated/code/evol_instruct_code_80k_v1_questionmin64max1024_sim09_frgpt35_processed2_respondedgpt4_processed_chat_uncensored_decontaminated09_train.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+  - path: /projects/bhuang/corpus/text/llm/generated/roleplay/roleplay_v3_instruct_cleaned_evolved_gpt4_cleaned_responded_gpt4_merged_v1_processed_chat_responded_gpt4turbo_processed_chat_uncensored_decontaminated09_train.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+  - path: /projects/bhuang/corpus/text/llm/generated/brainstorming/brainstorming_v1_instruct_cleaned_evolved_gpt4_cleaned_responded_gpt4turbo_processed_chat_requested_responded_batch_gpt4turbo0409_processed_chat_uncensored_decontaminated09_train.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+  - path: /projects/bhuang/corpus/text/llm/generated/no_robots/no_robots_train_translated_question_translated_system_responded_gpt4_processed_chat_uncensored_decontaminated09_train.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+  - path: /projects/bhuang/corpus/text/llm/generated/context_qa/wikipedia_fr_merged_contextqa_direct_reasoning_limited_irrlevant_multihop_responded_titled_processed2_chat_uncensored_decontaminated09_train.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+  - path: /projects/bhuang/corpus/text/llm/generated/function_calling/glaive_fc_function_maxlen512_dedup_maxsim95_translated_responded_gpt4turbo_processed_chat_uncensored_decontaminated09_train.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+  - path: /projects/bhuang/corpus/text/llm/merged/v3_1/sharegpt4openchat_lmsyschat1m_wildchat_deita_lima_oasst2_airoboros_capybara_codefeedback_codefeedbackfilteredinstruction_agentinstruct_merged_nonemptyturn_totminlen64_instmaxsim095_uncensored_decontaminated09_train.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+
+# test data
+# val_set_size: 0
+test_datasets:
+  - path: /projects/bhuang/corpus/text/llm/generated/self_instruct/self_instruct_merged_v21_v22_processed_mininstlen8_uncensored_decontaminated09_test.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+    split: train
+  - path: /projects/bhuang/corpus/text/llm/generated/orca/1m_gpt4_augmented_merged_v1_v2_processed_uncensored_decontaminated09_test.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+    split: train
+  - path: /projects/bhuang/corpus/text/llm/generated/math/metaMathQA_merged_v01_v02_processed_uncensored_decontaminated09_test.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+    split: train
+  - path: /projects/bhuang/corpus/text/llm/generated/math/orca_math_word_problems_maxsim08_translated_processed_responded_gpt4turbo0125_processed_uncensored_decontaminated09_test.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+    split: train
+  - path: /projects/bhuang/corpus/text/llm/generated/math/mathinstruct_cot_metamathorcamaxsim09_maxsim08_processed_responded_gpt4turbo0409_processed_chat_merged_processed_uncensored_decontaminated09_test.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+    split: train
+  - path: /projects/bhuang/corpus/text/llm/generated/code/evol_instruct_code_80k_v1_questionmin64max1024_sim09_frgpt35_processed2_respondedgpt4_processed_chat_uncensored_decontaminated09_test.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+    split: train
+  - path: /projects/bhuang/corpus/text/llm/generated/roleplay/roleplay_v3_instruct_cleaned_evolved_gpt4_cleaned_responded_gpt4_merged_v1_processed_chat_responded_gpt4turbo_processed_chat_uncensored_decontaminated09_test.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+    split: train
+  - path: /projects/bhuang/corpus/text/llm/generated/brainstorming/brainstorming_v1_instruct_cleaned_evolved_gpt4_cleaned_responded_gpt4turbo_processed_chat_requested_responded_batch_gpt4turbo0409_processed_chat_uncensored_decontaminated09_test.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+    split: train
+  - path: /projects/bhuang/corpus/text/llm/generated/no_robots/no_robots_train_translated_question_translated_system_responded_gpt4_processed_chat_uncensored_decontaminated09_test.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+    split: train
+  - path: /projects/bhuang/corpus/text/llm/generated/context_qa/wikipedia_fr_merged_contextqa_direct_reasoning_limited_irrlevant_multihop_responded_titled_processed2_chat_uncensored_decontaminated09_test.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+    split: train
+  - path: /projects/bhuang/corpus/text/llm/generated/function_calling/glaive_fc_function_maxlen512_dedup_maxsim95_translated_responded_gpt4turbo_processed_chat_uncensored_decontaminated09_test.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4
+    split: train
+
+# save chat template
+chat_template: vigogne_chat_v4
+# default_system_message: Tu es Vigogne, une IA conversationnelle conçue pour assister les humains.
+
+# data processing
+dataset_prepared_path: outputs/data
+dataset_processes: 32
+# dataset_keep_in_memory: true  # Debug dataset processing
+# dataset_shard_num:
+
+# dataloader
+dataloader_num_workers: 4
+
+# mas length
+sequence_len: 8192
+pad_to_sequence_len: true
+
+# packing
+sample_packing: true
+eval_sample_packing: false
+# You can set these packing optimizations AFTER starting a training at least once.
+# The trainer will provide recommended values for these values.
+sample_packing_eff_est: 0.86
+
+# group exaemple by length
+# training loss may have an oscillating pattern
+group_by_length: false
+
+# ignore loss on input
+train_on_inputs: false
+
+# save dir
+output_dir: outputs/sft/llama_3_8b_sft_qlora_vigogne3_ep3_r64_alphra32_pack8_bs8_lr1e4_tmp
+# save_safetensors:
+
+# training hyperparams
+# epoch/step
+num_epochs: 3
+# max_steps: 10
+
+# batch size
+micro_batch_size: 1
+eval_batch_size: 1
+gradient_accumulation_steps: 4
+
+# optimizer
+optimizer: paged_adamw_32bit
+adam_beta1:
+adam_beta2: 0.95
+# adam_epsilon: 1e-5
+
+# lr
+learning_rate: 1e-4
+lr_scheduler: cosine
+warmup_ratio: 0.03
+# warmup_steps: 10
+# cosine_min_lr_ratio:
+
+# wd
+weight_decay: 0.0
+
+# grad norm
+max_grad_norm: 1.0
+
+# gradient checkpointing 
+# unsloth?
+gradient_checkpointing: true
+gradient_checkpointing_kwargs:
+  use_reentrant: false
+
+# attention
+xformers_attention:
+flash_attention: false
+sdp_attention: true
+flash_optimum:
+
+# Whether to use torch.compile and which backend to use
+# torch_compile:
+# torch_compile_backend:
+
+debug:
+
+# ddp_find_unused_parameters:
+
+# deepspeed
+deepspeed:
+
+# fsdp
+fsdp:
+fsdp_config:
+
+# Add or change special tokens
+special_tokens:
+  pad_token: "<|end_of_text|>"
+
+# eval strategy
+eval_steps: 500
+eval_delay: 500
+
+do_bench_eval:
+# bench_dataset:
+
+# save strategy
+save_steps: 500
+save_total_limit: 3
+
+# log strategy
+logging_steps: 1
+
+# wandb
+# https://docs.wandb.ai/guides/integrations/huggingface#additional-wb-settings
+wandb_project: vigogne-v3
+wandb_entity:
+wandb_watch:
+wandb_name: llama_3_8b_sft_qlora_vigogne3_ep3_r64_alphra32_pack8_bs8_lr1e4
+wandb_log_model:
