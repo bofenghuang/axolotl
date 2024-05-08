@@ -8,7 +8,9 @@ seed: 10
 
 # base model
 # base_model: meta-llama/Meta-Llama-3-8B
-base_model: /projects/bhuang/models/llm/pretrained/Meta-Llama-3-8B
+# base_model: /projects/bhuang/models/llm/pretrained/Meta-Llama-3-8B
+# base_model: /gpfswork/rech/cjc/commun/models/pretrained/Meta-Llama-3-8B
+base_model: /gpfswork/rech/cjc/commun/models/pretrained/Meta-Llama-3-8B-Instruct
 model_type: AutoModelForCausalLM
 tokenizer_type: AutoTokenizer
 # tokenizer_use_fast: false
@@ -55,37 +57,32 @@ load_in_4bit: false
 #  - lm_head
 # lora_fan_in_fan_out:
 
-# resume_from_checkpoint:
-
 # data
 datasets:
-  - path: /projects/bhuang/corpus/text/llm/merged/v3_1/selfinstruct_orca_metamath_orcamath_mathinstruct_evolinstructcode_roleplay_brainstorming_no_robots_context_qa_function_calling_processed_system_dedupexact_uncensored_decontaminated_train.jsonl
+  - path: /gpfswork/rech/cjc/commun/corpus/llm/vigogne-3.2/train.jsonl
     type: sharegpt.load_ultrachat
-    conversation: chatml
-  - path: /projects/bhuang/corpus/text/llm/merged/v3_1/sharegpt4openchat_lmsyschat1m_wildchat_deita_lima_oasst2_airoboros_capybara_codefeedback_codefeedbackfilteredinstruction_agentinstruct.jsonl
-    type: sharegpt.load_ultrachat
-    conversation: chatml
+    conversation: llama3
 
 # test data
 # val_set_size: 0
 test_datasets:
-  - path: /projects/bhuang/corpus/text/llm/merged/v3_1/selfinstruct_orca_metamath_orcamath_mathinstruct_evolinstructcode_roleplay_brainstorming_no_robots_context_qa_function_calling_processed_system_dedupexact_uncensored_decontaminated_test.jsonl
+  - path: /gpfswork/rech/cjc/commun/corpus/llm/vigogne-3.2/test.jsonl
     type: sharegpt.load_ultrachat
-    conversation: chatml
+    conversation: llama3
     split: train
 
-# saved chat template
-chat_template: chatml
-default_system_message: Tu es Vigogne, une IA conversationnelle conçue pour assister les humains.
+# save chat template
+chat_template: llama3
+# default_system_message: Tu es Vigogne, une IA conversationnelle conçue pour assister les humains.
 
 # data processing
-dataset_prepared_path: outputs/data
-dataset_processes: 32
+dataset_prepared_path: /gpfswork/rech/cjc/commun/outputs/data
+dataset_processes: 8
 # dataset_keep_in_memory: true  # Debug dataset processing
 # dataset_shard_num:
 
 # dataloader
-dataloader_num_workers: 4
+dataloader_num_workers: 8
 
 # mas length
 sequence_len: 8192
@@ -96,7 +93,7 @@ sample_packing: true
 eval_sample_packing: false
 # You can set these packing optimizations AFTER starting a training at least once.
 # The trainer will provide recommended values for these values.
-sample_packing_eff_est:
+sample_packing_eff_est: 0.86
 
 # group exaemple by length
 # training loss may have an oscillating pattern
@@ -106,8 +103,8 @@ group_by_length: false
 train_on_inputs: false
 
 # save dir
-output_dir: outputs/sft/llama_3_8b_sft_fullfinetune_vigogne3_ep3
-# save_safetensors:
+output_dir: /gpfswork/rech/cjc/commun/outputs/llm/sft/llama_3_instruct_8b_sft_fft_vigogne31_seqlen8192_ep3_pack8_bs16_lr2e6_wd005
+save_safetensors: true
 
 # training hyperparams
 # epoch/step
@@ -115,27 +112,28 @@ num_epochs: 3
 # max_steps: 10
 
 # batch size
-micro_batch_size: 1
+micro_batch_size: 2
 eval_batch_size: 1
 gradient_accumulation_steps: 1
 
 # optimizer
-# optimizer: paged_adamw_8bit
 optimizer: adamw_bnb_8bit
+# optimizer: paged_adamw_8bit
 adam_beta1:
-adam_beta2:
+adam_beta2: 0.95
+# adam_epsilon: 1e-5
 
 # lr
-learning_rate: 2e-5
+learning_rate: 2e-6
 lr_scheduler: cosine
 warmup_ratio: 0.03
 # warmup_steps: 10
 # cosine_min_lr_ratio:
 
 # wd
-weight_decay: 0.0
-# add wd for fft?
-# weight_decay: 0.05
+# weight_decay: 0.0
+# add wd for fft? or 0.05
+weight_decay: 0.05
 
 # grad norm
 max_grad_norm: 1.0
@@ -144,12 +142,12 @@ max_grad_norm: 1.0
 # unsloth?
 gradient_checkpointing: true
 gradient_checkpointing_kwargs:
-  use_reentrant: true
+  use_reentrant: false
 
 # attention
 xformers_attention:
-flash_attention: false
-sdp_attention: true
+flash_attention: true
+sdp_attention:
 flash_optimum:
 
 # Whether to use torch.compile and which backend to use
@@ -172,24 +170,24 @@ special_tokens:
   pad_token: "<|end_of_text|>"
 
 # eval strategy
-eval_steps: 500
-eval_delay: 500
+eval_steps: 200
+# eval_delay: 500
 
 do_bench_eval:
 # bench_dataset:
 
 # save strategy
-save_steps: 500
-save_total_limit: 3
+save_steps: 200
+save_total_limit:
 
 # log strategy
 logging_steps: 1
 
 # wandb
 # https://docs.wandb.ai/guides/integrations/huggingface#additional-wb-settings
-# wandb_project: vigogne-v3
-wandb_project:
+wandb_mode: offline
+wandb_project: vigogne-v3
 wandb_entity:
 wandb_watch:
-wandb_name:
+wandb_name: llama_3_instruct_8b_sft_fft_vigogne31_seqlen8192_ep3_pack8_bs16_lr2e6_wd005
 wandb_log_model:
