@@ -56,7 +56,10 @@ def get_turns(  # pylint: disable=too-many-return-statements
                 yield role + "\n", ""
         return
     if self.sep_style == SeparatorStyle.NO_COLON_SINGLE:
-        yield "", system_prompt
+        # bh: adapt to support vigogne_chat_v4
+        # yield "", system_prompt
+        # bh: self.system_message can be empty while templated one system_prompt may not
+        yield "", system_prompt if self.system_message else ""
         for role, message in self.messages:
             if message:
                 yield role, message + self.sep
@@ -65,7 +68,6 @@ def get_turns(  # pylint: disable=too-many-return-statements
         return
     if self.sep_style == SeparatorStyle.NO_COLON_TWO:
         seps = [self.sep, self.sep2]
-        # bh: adapt to support vigogne_chat_v4
         # yield "", system_prompt
         yield "", system_prompt if self.system_message else ""
         for i, (role, message) in enumerate(self.messages):
@@ -126,10 +128,11 @@ def get_turns(  # pylint: disable=too-many-return-statements
                 yield role, ""
         return
     if self.sep_style == SeparatorStyle.LLAMA3:
-        if self.system_message:
-            # For llama3, the system message is NOT incorporated into the first human instruction
-            # All messages follow <|start_header_id|>' + role + '<|end_header_id|>\n\n'+ message + '<|eot_id|>
-            yield "", system_prompt
+        # if self.system_message:
+        #     # For llama3, the system message is NOT incorporated into the first human instruction
+        #     # All messages follow <|start_header_id|>' + role + '<|end_header_id|>\n\n'+ message + '<|eot_id|>
+        #     yield "", system_prompt
+        yield "", system_prompt if self.system_message else ""
         for i, (role, message) in enumerate(self.messages):
             if message:
                 yield f"<|start_header_id|>{role}<|end_header_id|>\n\n", f"{message.strip()}<|eot_id|>"

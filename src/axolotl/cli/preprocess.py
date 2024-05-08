@@ -62,6 +62,17 @@ def do_cli(config: Union[Path, str] = Path("examples/"), **kwargs):
     elif parsed_cfg.chat_template == "vigogne_chat_v4":
         register_vigogne_chat_v4_template()
 
+    if parsed_cfg.chat_template == "llama3" and parsed_cfg.default_system_message:
+        LOG.info(
+            f"LLaMA-3 set. Adding default system message: {parsed_cfg.default_system_message}"
+        )
+        register_llama3_template(parsed_cfg.default_system_message)
+    else:
+        register_llama3_template()
+
+    if parsed_cfg.chat_template == "vigogne_chat_v4":
+        register_vigogne_chat_v4_template()
+
     if not parsed_cfg.dataset_prepared_path:
         msg = (
             Fore.RED

@@ -49,8 +49,6 @@ def do_train(cfg, cli_args) -> Tuple[PreTrainedModel, PreTrainedTokenizer]:
             f"ChatML set. Adding default system message: {cfg.default_system_message}"
         )
         register_chatml_template(cfg.default_system_message)
-    elif cfg.chat_template == "vigogne_chat_v4":
-        register_vigogne_chat_v4_template()
     else:
         register_chatml_template()
 
@@ -61,6 +59,9 @@ def do_train(cfg, cli_args) -> Tuple[PreTrainedModel, PreTrainedTokenizer]:
         register_llama3_template(cfg.default_system_message)
     else:
         register_llama3_template()
+
+    if cfg.chat_template == "vigogne_chat_v4":
+        register_vigogne_chat_v4_template()
 
     if cfg.rl:  # and cfg.rl != "orpo":
         dataset_meta = load_rl_datasets(cfg=cfg, cli_args=cli_args)

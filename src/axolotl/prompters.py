@@ -321,6 +321,7 @@ class ShareGPTPrompter(Prompter):  # pylint: disable=too-few-public-methods
         conv = self._conversation.copy()
 
         original_source = source.copy()
+        # bh: replace default system message by first sys turn
         # Add the conversation system prompt if provided, otherwise use the default one
         if source[0]["from"] == "system":
             conv.set_system_message(source[0]["value"])

@@ -40,7 +40,8 @@ def register_chatml_template(system_message=None):
 
 
 def register_llama3_template(system_message=None):
-    system_message = system_message or "You are a helpful assistant."
+    # system_message = system_message or "You are a helpful assistant."
+    system_message = ""
     register_conv_template(
         Conversation(
             name="llama3",
@@ -69,6 +70,20 @@ def register_vigogne_chat_v4_template():
     #     )
     # )
 
+    # bh: only append eos for assistant turn
+    # register_conv_template(
+    #     Conversation(
+    #         name="vigogne_chat_v4",
+    #         system_template="<|system|>{system_message}",
+    #         roles=("<|user|>", "<|assistant|>"),
+    #         sep_style=SeparatorStyle.NO_COLON_TWO,
+    #         sep="",
+    #         sep2="</s>",
+    #         stop_str="</s>",
+    #     )
+    # )
+
+    # bh: append eos for all system/user/assistant turn
     register_conv_template(
         Conversation(
             name="vigogne_chat_v4",

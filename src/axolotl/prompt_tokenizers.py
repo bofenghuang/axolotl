@@ -63,9 +63,11 @@ class PromptTokenizingStrategy(abc.ABC):
         self, prompt: str, add_eos_token: bool = True, strip_bos_token: bool = False
     ) -> BatchEncoding:
         empty = BatchEncoding(data={"input_ids": [], "attention_mask": []})
-        if not prompt:
-            LOG.warning("Empty text requested for tokenization.")
-            return empty
+        # bh: I got some examples w/o system message
+        # bh: need to pass an empty system here to add bos
+        # if not prompt:
+        #     LOG.warning("Empty text requested for tokenization.")
+        #     return empty
 
         result = self.tokenizer(
             prompt,
@@ -370,6 +372,13 @@ class ShareGPTPromptTokenizingStrategy(PromptTokenizingStrategy):
                 {"from": conversation.roles[1], "to": prompt["roles"][1]},
             ]
 
+        # bh: patch to append funcation calling token (<tool_call>) to role token
+        # if "category" in prompt and "function_calling" in prompt["category"]:
+        #     role_remap = [
+        #         {"from": conversation.roles[0], "to": conversation.roles[0]},
+        #         {"from": conversation.roles[1], "to": conversation.roles[1] + "<tool_call>"},
+        #     ]
+
         try:
             for _, part in enumerate(
                 self.prompter.build_prompt(self.get_conversation_thread(prompt))
@@ -435,8 +444,12 @@ class ShareGPTPromptTokenizingStrategy(PromptTokenizingStrategy):
                     )
                     # bh: rstrip() is wrong
                     # bh: for chatml, it strips "<im_start>assistant\n" to "<im_start>assistant"
+                    # bh: for llama3, it strips "<|start_header_id|>assistant<|end_header_id|>\n\n" to "<|start_header_id|>assistant<|end_header_id|>",
+                    # bh: so the model learned to predict "\n\n" first each time
+                    # bh: also need to check if prefix/role token impact tokenized results, comparing "\n\na" and "a", "\n\n1." and "1."
                     role_res = self._tokenize(
-                        role.rstrip(),
+                        role,
+                        # role.rstrip(),
                         add_eos_token=False,
                         strip_bos_token=True,
                     )
