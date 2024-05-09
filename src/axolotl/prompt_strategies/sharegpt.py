@@ -95,6 +95,19 @@ def register_vigogne_chat_v4_template():
         )
     )
 
+def register_vigogne_chat_v4_phi3_template():
+
+    register_conv_template(
+        Conversation(
+            name="vigogne_chat_v4_phi3",
+            system_template="<|system|>\n{system_message}<|end|>\n",
+            roles=("<|user|>\n", "<|assistant|>\n"),
+            sep_style=SeparatorStyle.NO_COLON_SINGLE,
+            sep="<|end|>\n",
+            stop_str="<|end|>\n",
+        )
+    )
+
 
 # bh: PromptTokenizingStrategy.tokenize_prompt()
 # bh: Prompter.build_prompt()

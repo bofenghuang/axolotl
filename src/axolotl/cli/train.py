@@ -24,6 +24,7 @@ from axolotl.prompt_strategies.sharegpt import (
     register_chatml_template,
     register_llama3_template,
     register_vigogne_chat_v4_template,
+    register_vigogne_chat_v4_phi3_template,
 )
 from axolotl.train import train
 
@@ -62,6 +63,9 @@ def do_train(cfg, cli_args) -> Tuple[PreTrainedModel, PreTrainedTokenizer]:
 
     if cfg.chat_template == "vigogne_chat_v4":
         register_vigogne_chat_v4_template()
+
+    if cfg.chat_template == "vigogne_chat_v4_phi3":
+        register_vigogne_chat_v4_phi3_template()
 
     if cfg.rl:  # and cfg.rl != "orpo":
         dataset_meta = load_rl_datasets(cfg=cfg, cli_args=cli_args)

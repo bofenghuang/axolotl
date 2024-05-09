@@ -26,6 +26,7 @@ from axolotl.prompt_strategies.sharegpt import (
     register_chatml_template,
     register_llama3_template,
     register_vigogne_chat_v4_template,
+    register_vigogne_chat_v4_phi3_template,
 )
 
 LOG = logging.getLogger("axolotl.cli.preprocess")
@@ -72,6 +73,9 @@ def do_cli(config: Union[Path, str] = Path("examples/"), **kwargs):
 
     if parsed_cfg.chat_template == "vigogne_chat_v4":
         register_vigogne_chat_v4_template()
+
+    if parsed_cfg.chat_template == "vigogne_chat_v4_phi3":
+        register_vigogne_chat_v4_phi3_template()
 
     if not parsed_cfg.dataset_prepared_path:
         msg = (
