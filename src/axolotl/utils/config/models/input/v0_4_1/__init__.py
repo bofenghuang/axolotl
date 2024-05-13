@@ -186,6 +186,7 @@ class ChatTemplate(str, Enum):
     phi_3 = "phi_3"  # pylint: disable=invalid-name
     # bh: patch for vigogne_chat_v4
     vigogne_chat_v4 = "vigogne_chat_v4"  # pylint: disable=invalid-name
+    vigogne_chat_v4_mistral = "vigogne_chat_v4_mistral"  # pylint: disable=invalid-name
     vigogne_chat_v4_phi3 = "vigogne_chat_v4_phi3"  # pylint: disable=invalid-name
 
 

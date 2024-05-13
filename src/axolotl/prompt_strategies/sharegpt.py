@@ -95,6 +95,21 @@ def register_vigogne_chat_v4_template():
         )
     )
 
+
+def register_vigogne_chat_v4_mistral_template():
+
+    register_conv_template(
+        Conversation(
+            name="vigogne_chat_v4_mistral",
+            system_template="<|system|>{system_message}</s>",
+            roles=("<|user|>", "<|assistant|>"),
+            sep_style=SeparatorStyle.NO_COLON_SINGLE,
+            sep="</s>",
+            stop_str="</s>",
+        )
+    )
+
+
 def register_vigogne_chat_v4_phi3_template():
 
     register_conv_template(

@@ -24,6 +24,7 @@ from axolotl.prompt_strategies.sharegpt import (
     register_chatml_template,
     register_llama3_template,
     register_vigogne_chat_v4_template,
+    register_vigogne_chat_v4_mistral_template,
     register_vigogne_chat_v4_phi3_template,
 )
 from axolotl.train import train
@@ -63,6 +64,9 @@ def do_train(cfg, cli_args) -> Tuple[PreTrainedModel, PreTrainedTokenizer]:
 
     if cfg.chat_template == "vigogne_chat_v4":
         register_vigogne_chat_v4_template()
+
+    if cfg.chat_template == "vigogne_chat_v4_mistral":
+        register_vigogne_chat_v4_mistral_template()
 
     if cfg.chat_template == "vigogne_chat_v4_phi3":
         register_vigogne_chat_v4_phi3_template()
