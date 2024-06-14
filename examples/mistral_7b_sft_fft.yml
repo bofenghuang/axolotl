@@ -1,0 +1,208 @@
+# config
+
+# yaml direct write
+strict: false
+
+# seed
+seed: 10
+
+# base model
+# base_model: meta-llama/Meta-Llama-3-8B
+# base_model: /projects/bhuang/models/llm/pretrained/Meta-Llama-3-8B
+# base_model: /gpfswork/rech/cjc/commun/models/pretrained/Meta-Llama-3-8B
+# base_model: /gpfswork/rech/cjc/commun/models/pretrained/Meta-Llama-3-8B-Instruct
+base_model: mistralai/Mistral-7B-v0.1
+model_type: AutoModelForCausalLM
+tokenizer_type: AutoTokenizer
+# tokenizer_use_fast: false
+
+# resize_token_embeddings_to_32x:
+# overrides_of_model_config:
+#   rope_scaling:
+#     type: # linear | dynamic
+#     factor: # float
+
+# low_cpu_mem_usage:
+
+# Resume from a specific checkpoint dir
+resume_from_checkpoint:
+# If resume_from_checkpoint isn't set and you simply want it to start where it left off.
+auto_resume_from_checkpoints: true
+
+# dtype
+bf16: auto
+fp16:  # leave empty to use fp16 when bf16 is 'auto'
+tf32: false
+# No AMP ??
+bfloat16: false
+float16: false
+
+# quantization
+load_in_8bit: false
+load_in_4bit: false
+# bnb_config_kwargs:
+#   llm_int8_has_fp16_weight: false
+#   bnb_4bit_quant_type: nf4
+#   bnb_4bit_use_double_quant: true
+
+# adapter
+# adapter: qlora
+# # lora_model_dir:
+# lora_r: 64
+# lora_alpha: 32
+# lora_dropout: 0.05
+# # lora_target_modules:
+# lora_target_linear: true
+# lora_modules_to_save:
+#  - embed_tokens
+#  - lm_head
+# lora_fan_in_fan_out:
+
+# data
+datasets:
+  - path: /gpfswork/rech/cjc/commun/corpus/llm/vigogne-3.2/train.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4_mistral
+
+# test data
+# val_set_size: 0
+test_datasets:
+  - path: /gpfswork/rech/cjc/commun/corpus/llm/vigogne-3.2/test.jsonl
+    type: sharegpt.load_ultrachat
+    conversation: vigogne_chat_v4_mistral
+    split: train
+
+# save chat template
+chat_template: vigogne_chat_v4_mistral
+# default_system_message: Tu es Vigogne, une IA conversationnelle conçue pour assister les humains.
+
+# data processing
+dataset_prepared_path: /gpfswork/rech/cjc/commun/outputs/data
+dataset_processes: 16
+# dataset_keep_in_memory: true  # Debug dataset processing
+# dataset_shard_num:
+
+# dataloader
+dataloader_num_workers: 8
+
+# mas length
+sequence_len: 8192
+pad_to_sequence_len: true
+
+# packing
+sample_packing: true
+eval_sample_packing: false
+# You can set these packing optimizations AFTER starting a training at least once.
+# The trainer will provide recommended values for these values.
+sample_packing_eff_est: 0.92
+
+# group exaemple by length
+# training loss may have an oscillating pattern
+group_by_length: false
+
+# ignore loss on input
+train_on_inputs: false
+
+# save dir
+output_dir: /gpfswork/rech/cjc/commun/outputs/llm/sft/mistral_7b_sft_fft_vigogne31_seqlen8192_ep3_pack8_bs16_lr6e6_wd005
+save_safetensors: true
+
+# training hyperparams
+# epoch/step
+num_epochs: 3
+# max_steps: 10
+
+# batch size
+micro_batch_size: 2
+eval_batch_size: 1
+gradient_accumulation_steps: 1
+
+# optimizer
+optimizer: adamw_bnb_8bit
+# optimizer: paged_adamw_8bit
+adam_beta1:
+adam_beta2: 0.95
+adam_epsilon: 1e-5
+
+# lr
+learning_rate: 6e-6
+lr_scheduler: cosine
+warmup_ratio: 0.03
+# warmup_steps: 10
+# cosine_min_lr_ratio:
+
+# wd
+# weight_decay: 0.0
+# add wd for fft? or 0.05
+weight_decay: 0.05
+
+# grad norm
+max_grad_norm: 1.0
+
+# gradient checkpointing 
+# unsloth?
+gradient_checkpointing: true
+gradient_checkpointing_kwargs:
+  use_reentrant: false
+
+# attention
+xformers_attention:
+flash_attention: true
+sdp_attention:
+flash_optimum:
+
+# Whether to use torch.compile and which backend to use
+# torch_compile:
+# torch_compile_backend:
+
+debug:
+
+# ddp_find_unused_parameters:
+
+# deepspeed
+deepspeed: /gpfswork/rech/cjc/uof58yw/axolotl/deepspeed_configs/ds_config_zero2_no_offload.json
+
+# fsdp
+fsdp:
+fsdp_config:
+
+# Add or change special tokens
+special_tokens:
+  pad_token: "</s>"
+
+tokens:
+  - "<|system|>"
+  - "<|user|>"
+  - "<|assistant|>"
+  - "<available_tools>"
+  - "</available_tools>"
+  - "<tool_call>"
+  - "<tool_response>"
+  - "</tool_response>"
+  - "<available_documents>"
+  - "</available_documents>"
+  - "<reference>"
+  - "</reference>"
+
+# eval strategy
+eval_steps: 200
+# eval_delay: 500
+
+do_bench_eval:
+# bench_dataset:
+
+# save strategy
+save_steps: 200
+save_total_limit:
+
+# log strategy
+logging_steps: 1
+
+# wandb
+# https://docs.wandb.ai/guides/integrations/huggingface#additional-wb-settings
+wandb_mode: offline
+wandb_project: vigogne-v3
+wandb_entity:
+wandb_watch:
+wandb_name: mistral_7b_sft_fft_vigogne31_seqlen8192_ep3_pack8_bs16_lr6e6_wd005
+wandb_log_model:
