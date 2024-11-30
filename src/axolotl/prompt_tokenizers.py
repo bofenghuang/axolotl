@@ -21,6 +21,7 @@ LLAMA_DEFAULT_EOS_TOKEN = "</s>"  # nosec
 LLAMA_DEFAULT_BOS_TOKEN = "<s>"  # nosec
 LLAMA_DEFAULT_UNK_TOKEN = "<unk>"  # nosec
 
+# bh: monkeypatch fastchat conversation
 add_get_turns_to_conversation()
 
 
